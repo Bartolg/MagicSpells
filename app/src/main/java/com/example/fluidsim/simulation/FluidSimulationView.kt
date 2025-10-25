@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -40,6 +41,7 @@ class FluidSimulationView @JvmOverloads constructor(
     private var effectGenerator: TFLiteEffectGenerator? = null
     private var displayTime = 0f
     private var attachedLifecycle: Lifecycle? = null
+    private var simulationActive = false
 
     fun setLifecycle(lifecycle: Lifecycle) {
         attachedLifecycle?.removeObserver(this)
@@ -69,8 +71,13 @@ class FluidSimulationView @JvmOverloads constructor(
         val height = height.toFloat()
         if (width == 0f || height == 0f) return
 
-        displayTime += FRAME_TIME_SECONDS
         canvas.drawColor(Color.BLACK)
+
+        if (!simulationActive) {
+            return
+        }
+
+        displayTime += FRAME_TIME_SECONDS
 
         val colorModifiers = effectGenerator?.generateColorModifiers(displayTime)?.let {
             ColorModifiers(it.hue, it.saturation, it.value)
@@ -93,6 +100,30 @@ class FluidSimulationView @JvmOverloads constructor(
         }
 
         postOnAnimation(invalidateRunnable)
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                if (!simulationActive) {
+                    simulationActive = true
+                    displayTime = 0f
+                    postInvalidateOnAnimation()
+                }
+                return true
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (simulationActive) {
+                    performClick()
+                }
+                return simulationActive
+            }
+        }
+        return simulationActive || super.onTouchEvent(event)
+    }
+
+    override fun performClick(): Boolean {
+        return super.performClick()
     }
 
     private data class Vortex(
