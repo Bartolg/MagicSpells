@@ -1,6 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FluidSimAI</string>
-    <string name="status_ready">TensorFlow Lite ready</string>
-    <string name="status_missing_model">Place a TensorFlow Lite model in assets/effect_model.tflite</string>
+    <string name="app_name">Magic Spells</string>
+    <string name="status_ready">AI warm and ready</string>
+    <string name="status_ai_error">AI unavailable: %1$s</string>
+    <string name="status_template">%1$s fps | %2$dp | %3$d iters | thermal %4$d</string>
+    <string-array name="palette_entries">
+        <item>Blue &amp; Orange</item>
+        <item>Candy Rainbow</item>
+    </string-array>
+    <string-array name="grid_entries">
+        <item>512</item>
+        <item>1024</item>
+    </string-array>
 </resources>

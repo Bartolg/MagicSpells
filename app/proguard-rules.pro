@@ -1,3 +1,6 @@
-# Keep TensorFlow Lite classes that might be accessed via reflection.
 -keep class org.tensorflow.** { *; }
--keep class com.example.fluidsim.ai.** { *; }
+-keep class com.example.fluidsim.ml.** { *; }
+
+-keepclassmembers class * extends org.tensorflow.lite.Interpreter$Options$Builder { *; }
+
+-dontwarn org.tensorflow.**
