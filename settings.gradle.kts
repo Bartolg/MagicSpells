@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "FluidSimAI"
-include(":app")
+include(":app", ":engine", ":ml")
