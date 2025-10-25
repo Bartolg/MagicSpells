@@ -5,6 +5,7 @@ import android.util.Log
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
 import java.io.Closeable
+import java.nio.MappedByteBuffer
 
 /**
  * Loads a TensorFlow Lite model from assets/effect_model.tflite and exposes a convenience API
@@ -49,6 +50,12 @@ class TFLiteEffectGenerator private constructor(
         fun create(context: Context): TFLiteEffectGenerator? {
             return try {
                 val file = FileUtil.loadMappedFile(context, MODEL_PATH)
+
+                if (!file.hasValidTFLiteMagic()) {
+                    Log.w(TAG, "Model placeholder detected, falling back to procedural colors")
+                    return TFLiteEffectGenerator(null, modelAvailable = false)
+                }
+
                 val interpreter = Interpreter(file)
                 TFLiteEffectGenerator(interpreter, modelAvailable = true)
             } catch (missing: IllegalArgumentException) {
@@ -58,6 +65,17 @@ class TFLiteEffectGenerator private constructor(
                 Log.e(TAG, "Unable to initialize TensorFlow Lite", error)
                 null
             }
+        }
+
+        private fun MappedByteBuffer.hasValidTFLiteMagic(): Boolean {
+            if (remaining() < 4) return false
+
+            val magic = ByteArray(4)
+            duplicate().apply { position(0) }.get(magic)
+            return magic[0] == 'T'.code.toByte() &&
+                magic[1] == 'F'.code.toByte() &&
+                magic[2] == 'L'.code.toByte() &&
+                magic[3] == '3'.code.toByte()
         }
     }
 }
