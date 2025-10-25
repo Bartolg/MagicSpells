@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// MainActivity should be a top-level class like this
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding

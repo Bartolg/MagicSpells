@@ -1,5 +1,7 @@
 package com.example.fluidsim.ui;
 
+import static com.example.fluidsim.R.id.fluidSurfaceView;
+
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        surfaceView = findViewById(R.id.fluidSurfaceView);
+        surfaceView = findViewById(fluidSurfaceView);
         statusText = findViewById(R.id.statusText);
         aiSwitch = findViewById(R.id.aiToggle);
         aiStrength = findViewById(R.id.aiStrength);
