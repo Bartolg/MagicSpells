@@ -1,6 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FluidSimAI</string>
-    <string name="status_ready">TensorFlow Lite ready</string>
-    <string name="status_missing_model">Place a TensorFlow Lite model in assets/effect_model.tflite</string>
+    <string name="app_name">Magic Spells</string>
+    <string name="style_warm">Warm</string>
+    <string name="style_cool">Cool</string>
+    <string name="toggle_particles">Particles</string>
+    <string name="toggle_ai">AI Assist</string>
+    <string name="toggle_bloom">Bloom</string>
+    <string name="toggle_grid">Grid</string>
+    <string name="toggle_iterations">Iterations</string>
+    <string name="toggle_resolution">Grid Res</string>
+    <string name="toggle_reset">Reset</string>
+    <string name="toggle_record">Record</string>
+    <string name="fps_label">%1$.1f FPS</string>
 </resources>
