@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Magic Spells</string>
     <string name="status_ready">AI warm and ready</string>
+    <string name="status_missing_model">AI model missing</string>
     <string name="status_ai_error">AI unavailable: %1$s</string>
     <string name="status_template">%1$s fps | %2$dp | %3$d iters | thermal %4$d</string>
     <string-array name="palette_entries">

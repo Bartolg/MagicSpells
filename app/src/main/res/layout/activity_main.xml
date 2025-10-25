@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity">
+    tools:context=".MainActivity">
 
-    <com.example.fluidsim.ui.FluidSurfaceView
-        android:id="@+id/fluidSurfaceView"
+    <com.example.fluidsim.simulation.FluidSimulationView
+        android:id="@+id/simulationView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
