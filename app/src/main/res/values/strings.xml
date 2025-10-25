@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FluidSimAI</string>
+    <string name="status_ready">TensorFlow Lite ready</string>
+    <string name="status_missing_model">Place a TensorFlow Lite model in assets/effect_model.tflite</string>
+</resources>
