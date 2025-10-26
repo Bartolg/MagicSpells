@@ -8,10 +8,8 @@ import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.fluidsim.ml.AiAssist;
 import com.example.fluidsim.sim.FluidSimulation;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -30,13 +28,11 @@ public class FluidRenderer implements GLSurfaceView.Renderer {
         public final float fps;
         public final int gridSize;
         public final int pressureIterations;
-        public final int temperatureLevel;
 
-        public RendererStats(float fps, int gridSize, int pressureIterations, int temperatureLevel) {
+        public RendererStats(float fps, int gridSize, int pressureIterations) {
             this.fps = fps;
             this.gridSize = gridSize;
             this.pressureIterations = pressureIterations;
-            this.temperatureLevel = temperatureLevel;
         }
     }
 
@@ -79,20 +75,12 @@ public class FluidRenderer implements GLSurfaceView.Renderer {
         return simulation.getGridSize();
     }
 
+    public int getPressureIterations() {
+        return simulation.getPressureIterations();
+    }
+
     public void setPalette(int paletteId) {
         simulation.setPalette(paletteId);
-    }
-
-    public void setBloomEnabled(boolean enabled) {
-        simulation.setBloomEnabled(enabled);
-    }
-
-    public void setParticlesEnabled(boolean enabled) {
-        simulation.setParticlesEnabled(enabled);
-    }
-
-    public void setAiEnabled(boolean enabled, float strength) {
-        simulation.setAiEnabled(enabled, strength);
     }
 
     public void onTouch(float x, float y, float dx, float dy, int colorId) {
@@ -101,10 +89,6 @@ public class FluidRenderer implements GLSurfaceView.Renderer {
 
     public void reset() {
         simulation.reset();
-    }
-
-    public void setAiAssist(@NonNull AiAssist assist, @Nullable ByteBuffer input, @Nullable ByteBuffer output) {
-        simulation.attachAi(assist, input, output);
     }
 
     public void setOnFrameListener(@Nullable FrameListener listener) {
@@ -128,8 +112,7 @@ public class FluidRenderer implements GLSurfaceView.Renderer {
                 listener.onStats(new RendererStats(
                         fpsAverage,
                         simulation.getGridSize(),
-                        simulation.getPressureIterations(),
-                        simulation.getThermalLevel()));
+                        simulation.getPressureIterations()));
             }
         }
     }

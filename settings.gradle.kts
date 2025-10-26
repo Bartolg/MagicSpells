@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FluidSimAI"
+rootProject.name = "MagicSpells"
 include(":app")

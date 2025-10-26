@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,29 +16,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.fluidsim.R;
 import com.example.fluidsim.gl.FluidRenderer;
-import com.example.fluidsim.ml.AiAssist;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
- * The main activity wires UI controls to the OpenGL renderer. It exposes a minimal panel of
- * toggles that can be expanded to match the creative brief. The view hierarchy is intentionally
- * simple so it stays friendly to GLSurfaceView threading constraints.
+ * The main activity wires UI controls to the OpenGL renderer. It exposes a simple panel of
+ * toggles that control the compute-based fluid simulation.
  */
 public class MainActivity extends AppCompatActivity {
 
     private FluidSurfaceView surfaceView;
     private FluidRenderer renderer;
-    private AiAssist aiAssist;
-    private Switch aiSwitch;
-    private SeekBar aiStrength;
     private TextView statusText;
-
-    private final ByteBuffer aiInput = ByteBuffer.allocateDirect(256 * 256 * 7)
-            .order(ByteOrder.nativeOrder());
-    private final ByteBuffer aiOutput = ByteBuffer.allocateDirect(256 * 256 * 5)
-            .order(ByteOrder.nativeOrder());
+    private int currentPalette = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
         surfaceView = findViewById(fluidSurfaceView);
         statusText = findViewById(R.id.statusText);
-        aiSwitch = findViewById(R.id.aiToggle);
-        aiStrength = findViewById(R.id.aiStrength);
         Spinner paletteSpinner = findViewById(R.id.paletteSpinner);
         Spinner gridSpinner = findViewById(R.id.gridSpinner);
         SeekBar pressureSeek = findViewById(R.id.pressureSeek);
-        Switch bloomToggle = findViewById(R.id.bloomToggle);
-        Switch particlesToggle = findViewById(R.id.particlesToggle);
         Button resetButton = findViewById(R.id.resetButton);
 
         renderer = surfaceView.getRenderer();
@@ -67,8 +50,11 @@ public class MainActivity extends AppCompatActivity {
         paletteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         paletteSpinner.setAdapter(paletteAdapter);
         paletteSpinner.setSelection(0);
-        paletteSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener(pos ->
-                surfaceView.queueEvent(() -> renderer.setPalette(pos))));
+        paletteSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener(pos -> {
+            currentPalette = pos;
+            surfaceView.queueEvent(() -> renderer.setPalette(pos));
+        }));
+        surfaceView.queueEvent(() -> renderer.setPalette(currentPalette));
 
         ArrayAdapter<CharSequence> gridAdapter = ArrayAdapter.createFromResource(
                 this,
@@ -77,16 +63,20 @@ public class MainActivity extends AppCompatActivity {
         gridAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         gridSpinner.setAdapter(gridAdapter);
         gridSpinner.setSelection(1);
-        gridSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener(pos ->
-                surfaceView.queueEvent(() -> renderer.setQuality(pos == 0 ? 512 : 1024, 24))));
+        gridSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener(pos -> {
+            int gridSize = pos == 0 ? 512 : 1024;
+            int iterations = renderer.getPressureIterations();
+            surfaceView.queueEvent(() -> renderer.setQuality(gridSize, iterations));
+        }));
 
         pressureSeek.setMax(40);
-        pressureSeek.setProgress(24);
+        pressureSeek.setProgress(renderer.getPressureIterations());
         pressureSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int value, boolean fromUser) {
                 if (fromUser) {
-                    surfaceView.queueEvent(() -> renderer.setQuality(renderer.getGridSize(), value));
+                    int gridSize = renderer.getGridSize();
+                    surfaceView.queueEvent(() -> renderer.setQuality(gridSize, value));
                 }
             }
 
@@ -96,56 +86,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-
-        bloomToggle.setOnCheckedChangeListener((buttonView, isChecked) ->
-                surfaceView.queueEvent(() -> renderer.setBloomEnabled(isChecked)));
-        particlesToggle.setOnCheckedChangeListener((buttonView, isChecked) ->
-                surfaceView.queueEvent(() -> renderer.setParticlesEnabled(isChecked)));
 
         resetButton.setOnClickListener(v -> surfaceView.queueEvent(renderer::reset));
 
-        aiStrength.setMax(100);
-        aiStrength.setProgress(50);
-        aiStrength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    float strength = progress / 100f;
-                    surfaceView.queueEvent(() -> renderer.setAiEnabled(aiSwitch.isChecked(), strength));
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
         surfaceView.setOnTouchListener(this::handleSurfaceTouch);
-        initAi();
-    }
-
-    private void initAi() {
-        try {
-            aiAssist = new AiAssist(this, "models/effects_unet_int8.tflite");
-            renderer.setAiAssist(aiAssist, aiInput, aiOutput);
-            aiSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
-                    surfaceView.queueEvent(() -> renderer.setAiEnabled(isChecked, aiStrength.getProgress() / 100f)));
-            statusText.setText(R.string.status_ready);
-        } catch (Exception ex) {
-            statusText.setText(getString(R.string.status_ai_error, ex.getMessage()));
-            aiSwitch.setEnabled(false);
-        }
+        statusText.setText(R.string.status_initializing);
     }
 
     private void updateUiStatus(@NonNull FluidRenderer.RendererStats stats) {
         runOnUiThread(() -> {
             String fps = getString(R.string.status_template,
-                    String.format("%.1f", stats.fps),
+                    stats.fps,
                     stats.gridSize,
-                    stats.pressureIterations,
-                    stats.temperatureLevel);
+                    stats.pressureIterations);
             statusText.setText(fps);
         });
     }
@@ -164,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             dx = 0f;
             dy = 0f;
         }
-        int colorId = aiSwitch.isChecked() ? 1 : 0;
+        int colorId = currentPalette;
         surfaceView.queueEvent(() -> renderer.onTouch(x, y, dx, dy, colorId));
         return true;
     }
@@ -179,13 +132,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         surfaceView.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (aiAssist != null) {
-            aiAssist.close();
-        }
     }
 }

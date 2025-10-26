@@ -2,8 +2,32 @@
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba16f, binding = 0) writeonly uniform highp image2D uTarget;
+layout(rgba16f, binding = 1) readonly uniform highp image2D uPressure;
+layout(rgba16f, binding = 2) readonly uniform highp image2D uDivergence;
+
+uniform float uAlpha;
+uniform float uRBeta;
+
+float samplePressure(ivec2 coord, ivec2 size) {
+    coord = clamp(coord, ivec2(0), size - 1);
+    return imageLoad(uPressure, coord).x;
+}
 
 void main() {
     ivec2 gid = ivec2(gl_GlobalInvocationID.xy);
-    imageStore(uTarget, gid, vec4(0.0));
+    ivec2 size = imageSize(uPressure);
+    if (any(greaterThanEqual(gid, size))) {
+        return;
+    }
+    if (gid.x == 0 || gid.y == 0 || gid.x == size.x - 1 || gid.y == size.y - 1) {
+        imageStore(uTarget, gid, vec4(0.0));
+        return;
+    }
+    float left = samplePressure(gid + ivec2(-1, 0), size);
+    float right = samplePressure(gid + ivec2(1, 0), size);
+    float bottom = samplePressure(gid + ivec2(0, -1), size);
+    float top = samplePressure(gid + ivec2(0, 1), size);
+    float divergence = imageLoad(uDivergence, gid).x;
+    float pressure = (left + right + bottom + top + uAlpha * divergence) * uRBeta;
+    imageStore(uTarget, gid, vec4(pressure, 0.0, 0.0, 0.0));
 }

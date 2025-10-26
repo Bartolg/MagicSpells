@@ -2,8 +2,40 @@
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba16f, binding = 0) writeonly uniform highp image2D uTarget;
+layout(rgba16f, binding = 1) readonly uniform highp image2D uSource;
+layout(rgba16f, binding = 2) readonly uniform highp image2D uVelocity;
+
+uniform float uDt;
+uniform float uDissipation;
+
+vec4 bilinearSample(highp image2D tex, vec2 coord) {
+    ivec2 size = imageSize(tex);
+    coord = clamp(coord, vec2(0.0), vec2(size) - 1.001);
+    ivec2 c0 = ivec2(floor(coord));
+    ivec2 c1 = min(c0 + ivec2(1, 0), size - 1);
+    ivec2 c2 = min(c0 + ivec2(0, 1), size - 1);
+    ivec2 c3 = min(c0 + ivec2(1, 1), size - 1);
+    vec2 f = coord - vec2(c0);
+    vec4 s0 = imageLoad(tex, c0);
+    vec4 s1 = imageLoad(tex, c1);
+    vec4 s2 = imageLoad(tex, c2);
+    vec4 s3 = imageLoad(tex, c3);
+    vec4 a = mix(s0, s1, f.x);
+    vec4 b = mix(s2, s3, f.x);
+    return mix(a, b, f.y);
+}
 
 void main() {
     ivec2 gid = ivec2(gl_GlobalInvocationID.xy);
-    imageStore(uTarget, gid, vec4(0.0));
+    ivec2 size = imageSize(uTarget);
+    if (any(greaterThanEqual(gid, size))) {
+        return;
+    }
+    vec2 center = vec2(gid) + 0.5;
+    vec2 velocity = imageLoad(uVelocity, gid).xy;
+    vec2 back = center - velocity * uDt;
+    back = clamp(back, vec2(0.5), vec2(size) - 0.5);
+    vec4 value = bilinearSample(uSource, back - 0.5);
+    value *= uDissipation;
+    imageStore(uTarget, gid, value);
 }
