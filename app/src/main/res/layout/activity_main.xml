@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="com.example.fluidsim.ui.MainActivity">
 
     <com.example.fluidsim.ui.FluidSurfaceView
         android:id="@+id/fluidSurfaceView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <com.example.fluidsim.simulation.FluidSimulationView
-        android:id="@+id/simulationView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -20,54 +14,29 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:padding="16dp"
-        android:background="@android:color/transparent">
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="#66000000"
             android:orientation="vertical"
-            android:padding="8dp"
-            android:background="@android:color/transparent">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/statusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Initializing..."
+                android:text="Initializing"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
-
-            <Switch
-                android:id="@+id/aiToggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AI Assist" />
-
-            <SeekBar
-                android:id="@+id/aiStrength"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp" />
-
-            <Switch
-                android:id="@+id/bloomToggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="Bloom" />
-
-            <Switch
-                android:id="@+id/particlesToggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="Particles" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Palette" />
+                android:layout_marginTop="12dp"
+                android:text="Palette"
+                android:textColor="@android:color/white" />
 
             <Spinner
                 android:id="@+id/paletteSpinner"
@@ -77,7 +46,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Grid" />
+                android:layout_marginTop="12dp"
+                android:text="Grid"
+                android:textColor="@android:color/white" />
 
             <Spinner
                 android:id="@+id/gridSpinner"
@@ -87,7 +58,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pressure Iters" />
+                android:layout_marginTop="12dp"
+                android:text="Pressure iterations"
+                android:textColor="@android:color/white" />
 
             <SeekBar
                 android:id="@+id/pressureSeek"
@@ -98,6 +71,7 @@
                 android:id="@+id/resetButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="Reset" />
         </LinearLayout>
     </ScrollView>
