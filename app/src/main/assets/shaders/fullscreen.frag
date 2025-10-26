@@ -29,8 +29,8 @@ void main() {
         fragColor = vec4(paletteWarm(t), 1.0);
         return;
     }
-    vec4 sample = texture(uDensity, vUv);
-    vec3 dye = sample.xyz;
+    vec4 densitySample = texture(uDensity, vUv);
+    vec3 dye = densitySample.xyz;
     float strength = clamp(length(dye), 0.0, 1.5);
     vec3 paletteColor = (uPalette == 0) ? paletteWarm(strength) : paletteRainbow(strength);
     vec3 normalized = normalize(dye + vec3(1e-4));
